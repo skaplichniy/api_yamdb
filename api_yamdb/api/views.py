@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework import permissions, viewsets
 from .serializers import CategorySerializer, GenreSerializer, TitlesSerializer
-from yamdb.models import Category, Genre, Titles
+from .serializers import ReviewSerializer, CommentsSerializer
+from yamdb.models import Category, Genre, Titles, Review, Comments
 
 # Create your views here.
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -16,3 +17,11 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
 
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+class CommentsViewSet(viewsets.ModelViewSet):
+    queryset = Comments.objects.all()
+    serializer_class = CommentsSerializer
+    

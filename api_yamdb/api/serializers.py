@@ -22,3 +22,13 @@ class TitlesSerializer(serializers.ModelSerializer):
         model = Titles
         fields = '__all__'
 
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+class CommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
