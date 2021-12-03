@@ -1,6 +1,6 @@
 from django.db import models
 
-class Category(models.Model)
+class Category(models.Model):
     CHOICES_CATEGORY = (
         ('books', 'Книги'),
         ('movies', 'Фильмы'),
@@ -12,7 +12,7 @@ class Category(models.Model)
     def __str__(self):
         return self.name
 
-class Genre(models.Model)
+class Genre(models.Model):
     CHOICES_GENRE = (
         ('story', 'Сказка'),
         ('rock', 'Рок'),
@@ -24,7 +24,7 @@ class Genre(models.Model)
     def __str__(self):
         return self.name
 
-class Titles(models.Model)
+class Titles(models.Model):
     name = models.CharField(max_length=300)
     genre = models.ForeignKey(Genre)
     category = models.ForeignKey(
