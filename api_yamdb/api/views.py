@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
-
+from permissions import AuthorOrModeratorOrAdminOrReadonly
 from reviews.models import User
 from .serializers import UserSerializer
     
