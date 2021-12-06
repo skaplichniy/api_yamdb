@@ -3,6 +3,7 @@ from rest_framework import permissions, viewsets
 from .serializers import CategorySerializer, GenreSerializer, TitlesSerializer
 from .serializers import ReviewSerializer, CommentsSerializer
 from yamdb.models import Category, Genre, Titles, Review, Comments
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -14,8 +15,17 @@ class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
+
+    def get_queryset(self):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Titles, pk=title_id)
+        return Review.objects.filter(title=title)
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Titles, pk=title_id)
+        serializer.save(author=self.request.user, title=title)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()

@@ -1,4 +1,6 @@
+from re import T
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Category(models.Model):
@@ -51,15 +53,18 @@ class Review (models.Model):
         User, on_delete=models.CASCADE, related_name='review'
     )
     pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True
+        'Дата добавления', auto_now_add=True, db_index=True
     )
     score = models.IntegerField( 
         'оценка',
-        validators=(
+        validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
-        )
+        ]
     )
+    class Meta:
+        constraints = (models.UniqueConstraint(
+            fields=('title_id', 'author', ), name='unique pair'), )
 
 
 class Comments (models.Model):
