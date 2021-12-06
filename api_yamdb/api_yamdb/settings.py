@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'yamdb',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -84,6 +84,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# User
+
+AUTH_USER_MODEL = 'reviews.User'
 
 # Internationalization
 
