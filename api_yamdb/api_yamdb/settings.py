@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'yamdb',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -84,6 +84,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# User
+
+AUTH_USER_MODEL = 'reviews.User'
 
 # Internationalization
 
@@ -103,3 +106,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
