@@ -8,24 +8,38 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
-from permissions import AuthorOrModeratorOrAdminOrReadonly
+from permissions import AuthorOrModeratorOrAdminOrReadonly, AdminOrReadonly
 from reviews.models import User
 from .serializers import UserSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
     
 
 class CategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = (AdminOrReadonly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
+    permission_classes = (AdminOrReadonly,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
+    permission_classes = (AdminOrReadonly,)
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
+    pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('name', 'year',)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

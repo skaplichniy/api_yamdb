@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from reviews.models import User
 
+
 class AuthorOrModeratorOrAdminOrReadonly(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(
@@ -19,3 +20,10 @@ class AuthorOrModeratorOrAdminOrReadonly(permissions.BasePermission):
                 or request.user.role == User.ADMIN
                 or request.user.is_superuser
         )
+
+
+class AdminOrReadonly(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return (request.method in permissions.SAFE_METHODS
+                or request.user.is_superuser)

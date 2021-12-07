@@ -39,24 +39,14 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    CHOICES_CATEGORY = (
-        ('books', 'Книги'),
-        ('movies', 'Фильмы'),
-        ('music', 'Музыка'),
-    )
-    name = models.CharField(max_length=300, choices = CHOICES_CATEGORY)
+    name = models.CharField(max_length=300)
     slug = models.SlugField(null=False, unique=True)
 
     def __str__(self):
         return self.name
 
 class Genre(models.Model):
-    CHOICES_GENRE = (
-        ('story', 'Сказка'),
-        ('rock', 'Рок'),
-        ('arthouse', 'Артхаус'),
-    )
-    name = models.CharField(max_length=300, choices = CHOICES_GENRE)
+    name = models.CharField(max_length=300)
     slug = models.SlugField(null=False, unique=True)
 
     def __str__(self):
@@ -74,6 +64,8 @@ class Titles(models.Model):
         help_text='Категория произведения',
         verbose_name='Категория')
     slug = models.SlugField(null=False, unique=True)
+    description = models.CharField(max_length=1000, blank=True)
+    year = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.name
