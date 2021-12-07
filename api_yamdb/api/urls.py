@@ -12,7 +12,7 @@ router_v1 = routers.DefaultRouter()
 router_v1.register('users',
                    UserViewSet,
                    basename='users')
-router_v1.register(r'reviews', ReviewViewSet)
+router_v1.register(r'reviews', ReviewViewSet, basename='reviews')
 router_v1.register(
     r'reviews/(?P<rewiev_id>[^/.]+)/comments',
     CommentsViewSet,

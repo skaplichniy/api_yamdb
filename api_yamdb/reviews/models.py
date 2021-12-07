@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -23,6 +22,7 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Пользовательская роль',
+        max_length=150,
         choices=ROLE_CHOISES,
         default=USER,
         blank=False,
@@ -54,7 +54,7 @@ class Genre(models.Model):
 
 class Titles(models.Model):
     name = models.CharField(max_length=300)
-    genre = models.ForeignKey(Genre)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     category = models.ForeignKey(
         Category, 
         on_delete=models.SET_NULL,

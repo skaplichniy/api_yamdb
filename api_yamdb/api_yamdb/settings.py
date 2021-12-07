@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     'reviews',
+    'rest_framework',
     'django_filters',
 ]
 
@@ -113,7 +114,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DangoFiltersBackend',
-    )
+   # 'DEFAULT_FILTER_BACKENDS': (
+    #    'django_filters.rest_framework.DangoFiltersBackend',
+    #)
 }
