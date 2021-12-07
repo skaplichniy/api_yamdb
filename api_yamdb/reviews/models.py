@@ -27,9 +27,9 @@ class User(AbstractUser):
         default=USER,
         blank=False,
     )
-    confirmation_code = models.IntegerField(
+    confirmation_code = models.CharField(
         'Код подтверждения',
-        max_length=6,
+        max_length=100,
         null=True,
         blank=False,
     )
