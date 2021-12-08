@@ -1,5 +1,5 @@
 
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, serializers, viewsets
 from .serializers import CategorySerializer, GenreSerializer, TitlesSerializer
 from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Titles, Review
@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
-from .permissions import AuthorOrModeratorOrAdminOrReadonly, AdminOrReadonly
+from .permissions import AuthorOrModeratorOrAdminOrReadonly, AdminOrReadonly, SelfOrAdmin
 from reviews.models import User
 from .serializers import UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -47,17 +47,24 @@ class TitlesViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year',)
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (AuthorOrModeratorOrAdminOrReadonly,)
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
-        reviews = title.reviews.all()
-        return reviews
+        title_id = self.kwargs.get('post_id')
+        title = get_object_or_404(Titles, pk=title_id)
+        return Review.objects.filter(title=title)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        title_id = self.kwargs.get('post_id')
+        title = get_object_or_404(Titles, pk=title_id)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
@@ -77,7 +84,8 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ViewSet):
-    permission_classes = IsAdminUser
+    #permission_classes = IsAdminUser
+    permission_classes = (SelfOrAdmin,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
