@@ -25,21 +25,17 @@ class AuthorOrModeratorOrAdminOrReadonly(permissions.BasePermission):
 class AdminOrReadonly(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return bool(
-            request.method in permissions.SAFE_METHODS
-            or request.user
-            and request.user.is_authenticated
-            and request.user.role == User.Admin
-            or request.user.is_superuser
+        user = request.user
+        return (
+            user.is_authenticated and user.is_admin
+            or user.is_superuser
         )
 
     def has_object_permission(self, request, view, obj):
-        return bool(
-            request.method in permissions.SAFE_METHODS
-            or request.user
-            and request.user.is_authenticated
-            and request.user.role == User.Admin
-            or request.user.is_superuser
+        user = request.user
+        return (
+            user.is_authenticated and user.is_admin
+            or user.is_superuser
         )
 
 
@@ -49,7 +45,7 @@ class SelfOrAdmin(permissions.BasePermission):
         return bool(
             request.user
             and request.user.is_authenticated
-            and request.user.role == User.Admin
+            and request.user.role == User.ADMIN
             or request.user.is_superuser
         )
 
@@ -58,6 +54,11 @@ class SelfOrAdmin(permissions.BasePermission):
             request.user
             and request.user.is_authenticated
             and request.user == obj
-            or request.user.role == User.Admin
+            or request.user.role == User.ADMIN
             or request.user.is_superuser
         )
+
+class ReadOnly(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
