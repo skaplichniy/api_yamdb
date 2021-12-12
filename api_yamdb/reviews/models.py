@@ -85,9 +85,9 @@ class Titles(models.Model):
     year = models.IntegerField(null=True, blank=True)
 
 
+
     def __str__(self):
         return self.name
-
 
 class Review (models.Model):
     title_id = models.OneToOneField(
@@ -100,6 +100,7 @@ class Review (models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
+    slug = models.SlugField(null=False, unique=True)
     score = models.IntegerField( 
         'оценка',
         validators=[
@@ -109,7 +110,7 @@ class Review (models.Model):
     )
     class Meta:
         constraints = (models.UniqueConstraint(
-            fields=('title_id', 'author', ), name='unique pair'), )
+            fields=('title_id', 'author',), name='unique pair'),)
 
 
 class Comments (models.Model):
