@@ -1,6 +1,6 @@
 
-from rest_framework import permissions, serializers, viewsets
-from .serializers import CategorySerializer, GenreSerializer, TitlesSerializer
+from rest_framework import permissions, serializers, viewsets, mixins
+from .serializers import CategorySerializer, GenreSerializer, ReadTitleSerializer, WriteTitleSerializer
 from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Titles, Review
 from django.shortcuts import get_object_or_404
@@ -11,6 +11,7 @@ from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+
 from rest_framework.pagination import LimitOffsetPagination
 from .permissions import AuthorOrModeratorOrAdminOrReadonly, AdminOrReadonly, SelfOrAdmin
 from reviews.models import User
@@ -21,7 +22,15 @@ from rest_framework import filters
 from .serializers import GetTokenSerializer, UserSerializer, UserMeSerializer
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class ListCreateDestroyViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+class CategoryViewSet(ListCreateDestroyViewSet):
     permission_classes = (AdminOrReadonly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -30,7 +39,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     permission_classes = (AdminOrReadonly,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -42,7 +51,15 @@ class GenreViewSet(viewsets.ModelViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrReadonly,)
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return WriteTitleSerializer
+        if self.action == 'partial_update':
+            return WriteTitleSerializer
+        return ReadTitleSerializer
+        
+    serializer_class = WriteTitleSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year',)
@@ -52,19 +69,17 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    serializer_class = ReviewSerializer
     permission_classes = (AuthorOrModeratorOrAdminOrReadonly,)
+    serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        title_id = self.kwargs.get('post_id')
-        title = get_object_or_404(Titles, pk=title_id)
-        return Review.objects.filter(title=title)
+        title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
+        reviews = title.reviews.all()
+        return reviews
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get('post_id')
-        title = get_object_or_404(Titles, pk=title_id)
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user)
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
@@ -124,4 +139,3 @@ def me(self, request):
         request.user.refresh_from_db()
     serializer = self.get_serializer(request.user)
     return Response(serializer.data)
-
