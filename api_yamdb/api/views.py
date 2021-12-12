@@ -20,7 +20,6 @@ from rest_framework import filters
 from .filter import TitleFilter
 from .serializers import GetTokenSerializer, UserSerializer, UserMeSerializer
 
-
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrReadonly,)
     queryset = Category.objects.all()
@@ -81,12 +80,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title_id = self.kwargs.get('post_id')
-        title = get_object_or_404(Titles, pk=title_id)
+        title = get_object_or_404(Titles, id=title_id)
         return Review.objects.filter(title=title)
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('post_id')
-        title = get_object_or_404(Titles, pk=title_id)
+        title = get_object_or_404(Titles, id=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
@@ -106,19 +105,22 @@ class CommentsViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class UserViewSet(viewsets.ViewSet):
-    #permission_classes = IsAdminUser
-    permission_classes = (AdminOrReadonly,)
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AdminOrReadonly]
     lookup_field = 'username'
-    
+    filter_backends = [filters.SearchFilter]
+    search_fields = [
+        'username',
+    ]
+
     @action(
-        detail=False, methods=['get', 'patch'],
-        url_path='me', url_name='me',
-        permission_classes=(SelfOrAdmin,)
+        methods=['get', 'patch'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
     )
-    def about_me(self, request):
+    def me(self, request):
         serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
             serializer = UserSerializer(
@@ -126,7 +128,6 @@ class UserViewSet(viewsets.ViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -135,7 +136,7 @@ def signup(request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        user = User.objects.get_or_create()
+        user = get_object_or_404(User, username=username, email=email)
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
             'Регистрация в сервисе отзывов',
@@ -144,23 +145,6 @@ def signup(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-@api_view(['POST'])
-def get_token(request):
-    serializer = TokenSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    username = serializer.data['username']
-    user = get_object_or_404(User, username=username)
-    confirmation_code = serializer.data['confirmation_code']
-    if not default_token_generator.check_token(user, confirmation_code):
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    token = RefreshToken.for_user(user)
-    return Response(
-        {'token': str(token.access_token)}, status=status.HTTP_200_OK
-    )
 
 
 @action(
@@ -187,4 +171,18 @@ def code(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+def get_token(request):
+    serializer = TokenSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    username = serializer.data['username']
+    user = get_object_or_404(User, username=username)
+    confirmation_code = serializer.data['confirmation_code']
+    if not default_token_generator.check_token(user, confirmation_code):
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    token = RefreshToken.for_user(user)
+    return Response(
+        {'token': str(token.access_token)}, status=status.HTTP_200_OK
+    )

@@ -15,6 +15,7 @@ ROLE_CHOICES = (
 )
 
 class User(AbstractUser):
+    username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(
         unique=True,
         verbose_name='Адрес электронной почты'
@@ -98,7 +99,6 @@ class Titles(models.Model):
         db_index=True,
         related_name='titles',
         verbose_name='Жанр',
-        null=True,
     )
     category = models.ForeignKey(
         Category,
