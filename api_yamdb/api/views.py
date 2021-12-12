@@ -188,10 +188,3 @@ def code(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def send_confirmation_code(user):
-    confirmation_code = default_token_generator.make_token(user)
-    subject = 'Код подтверждения YaMDb'
-    message = f'{confirmation_code} - ваш код для авторизации на YaMDb'
-    admin_email = user.Admin
-    user_email = [user.email]
-    return send_mail(subject, message, admin_email, user_email)
