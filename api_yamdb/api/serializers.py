@@ -2,7 +2,9 @@
 from rest_framework import serializers
 from reviews.models import Category, Genre, Titles, Review, Comments
 from reviews.models import User
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(

@@ -15,35 +15,20 @@ ROLE_CHOICES = (
 )
 
 class User(AbstractUser):
-    username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField(
-        unique=True,
-        verbose_name='Адрес электронной почты'
-    )
-    role = models.CharField(
-        max_length=255,
-        choices=ROLE_CHOICES,
-        default='USER',
-        verbose_name='Роль'
-    )
-    bio = models.TextField(
-        blank=True,
-        verbose_name='Биография'
-    )
-    confirmation_code = models.CharField(
-        max_length=7,
-        verbose_name='Код подтверждения',
-        blank=True,
-        null=True,
-        unique=True
+    email = models.EmailField(('email address'), unique=True)
+    bio = models.TextField(max_length=300, blank=True)
+    confirmation_code = models.CharField(max_length=6, default='000000')
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    USER_ROLE = (
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin'),
     )
 
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-
-    def __str__(self) -> str:
-        return self.username
+    role = models.CharField(max_length=9, choices=USER_ROLE, default='user')
 
     @property
     def is_admin(self):

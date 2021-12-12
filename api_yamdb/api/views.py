@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
-from .permissions import AuthorOrModeratorOrAdminOrReadonly, AdminOrReadonly, SelfOrAdmin, ReadOnly, AuthorStaffOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
 from reviews.models import User
 from .serializers import UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -21,7 +21,7 @@ from .filter import TitleFilter
 from .serializers import GetTokenSerializer, UserSerializer, UserMeSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = (AdminOrReadonly,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
@@ -41,7 +41,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    permission_classes = (AdminOrReadonly,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
@@ -61,7 +61,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    permission_classes = (AdminOrReadonly,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Titles.objects.all()
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
@@ -75,7 +75,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorStaffOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrAdminOrModerator,)
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -90,7 +90,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
-    permission_classes = (AuthorStaffOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrModerator,)
     serializer_class = CommentsSerializer
     pagination_class = LimitOffsetPagination
 
@@ -108,7 +108,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AdminOrReadonly]
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
     filter_backends = [filters.SearchFilter]
     search_fields = [
@@ -129,6 +129,8 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 @api_view(['POST'])
