@@ -1,5 +1,5 @@
 from rest_framework import permissions, serializers, viewsets
-from .serializers import CategorySerializer, GenreSerializer, TitlesSerializer, TitlesCreateSerializer, SignupSerializer, TokenSerializer
+from .serializers import CategorySerializer, GenreSerializer, TitleWriteSerializer, TitleReadSerializer, SignupSerializer, TokenSerializer
 from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Titles, Review
 from django.shortcuts import get_object_or_404
@@ -17,6 +17,7 @@ from .serializers import UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters
+from .filter import TitleFilter
 from .serializers import GetTokenSerializer, UserSerializer, UserMeSerializer
 
 
@@ -63,16 +64,15 @@ class GenreViewSet(viewsets.ModelViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrReadonly,)
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year',)
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH',):
-            return TitlesCreateSerializer
-        return TitlesSerializer
-
+        if self.request.method in ['POST', 'PATCH']:
+            return TitleWriteSerializer
+        return TitleReadSerializer
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

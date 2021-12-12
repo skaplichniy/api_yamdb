@@ -8,6 +8,7 @@ class AuthorOrModeratorOrAdminOrReadonly(permissions.BasePermission):
                 request.method in permissions.SAFE_METHODS
                 or request.user
                 and request.user.is_authenticated
+                or request.user.is_superuser
             )
 
     def has_object_permission(self, request, view, obj):
@@ -29,6 +30,7 @@ class AdminOrReadonly(permissions.BasePermission):
             request.method in 'GET'
             or request.user.is_authenticated
             and request.user.is_admin
+            or request.user.is_superuser
         )
 
 
@@ -65,4 +67,5 @@ class AuthorStaffOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
             request.method in 'GET'
             or request.user.is_moderator or request.user.is_admin
             or request.user == obj.author
+            or request.user.is_superuser
         )
