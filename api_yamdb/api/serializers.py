@@ -90,26 +90,26 @@ class TitlesSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True,
-        default=serializers.CurrentUserDefault()
+        slug_field='name', read_only=True,
+       # default=serializers.CurrentUserDefault()
     )
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
 
     def validate(self, data):
         if self.context['request'].method != 'POST':
-            return data
+            #return data
 
-        title_id = self.context['view'].kwargs.get('title_id')
-        author = self.context['request'].user
-        if Review.objects.filter(
-                author=author, title=title_id).exists():
-            raise serializers.ValidationError(
-                'Вы уже написали отзыв к этому произведению.'
-            )
-        return data
+            user = self.context['view'].kwargs.get('title_id')
+            title_id = self.context['request'].user
+            if Review.objects.filter(
+                    author=user, title=title_id).exists():
+                raise serializers.ValidationError(
+                     'Вы уже написали отзыв к этому произведению.'
+                )
+            return data
 
     def validate_score(self, value):
         if not 1 <= value <= 10:
@@ -118,11 +118,19 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         return value
 
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+
 
 class CommentsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
     class Meta:
         model = Comments
-        fields = '__all__'
+        fields = ('id', 'author', 'text', 'pub_date')
 
 
 class UserMeSerializer(serializers.ModelSerializer):

@@ -64,15 +64,17 @@ class Genre(models.Model):
 
 class Titles(models.Model):
     name = models.CharField(max_length=300)
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.CASCADE,
+        blank=True,
+        db_index=True,
         related_name='genre',
         verbose_name='Жанр'
     )
     category = models.ForeignKey(
         Category, 
         on_delete=models.SET_NULL,
+        db_index=True,
         blank=True,
         null=True,
         related_name='titles',
@@ -81,6 +83,7 @@ class Titles(models.Model):
     slug = models.SlugField(null=False, unique=True)
     description = models.CharField(max_length=1000, blank=True)
     year = models.IntegerField(null=True, blank=True)
+
 
     def __str__(self):
         return self.name
