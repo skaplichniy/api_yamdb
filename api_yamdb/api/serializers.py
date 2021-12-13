@@ -42,6 +42,7 @@ class GenreSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'slug'}
         }
+        
 
 
 class GenreField(serializers.SlugRelatedField):
@@ -105,63 +106,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
         model = Comments
-        fields = ('id', 'author', 'text', 'pub_date')
+        exclude = ['review']
 
-
-class UserMeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        exclude = ('role',)
-
-
-
-class GetTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
-
-
-class AdminUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = (
-            '__all__'
-        )
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя "me" не разрешено.'
-            )
-        return value
-
-
-class SignupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'email',)
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя "me" не разрешено.'
-            )
-        return value
-
-
-class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')

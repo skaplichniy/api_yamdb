@@ -1,5 +1,5 @@
 from rest_framework import permissions, serializers, viewsets
-from .serializers import CategorySerializer, GenreSerializer, TitleWriteSerializer, TitleReadSerializer, SignupSerializer, TokenSerializer
+from .serializers import CategorySerializer, GenreSerializer, TitleWriteSerializer, TitleReadSerializer
 from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Titles, Review
 from django.shortcuts import get_object_or_404
@@ -18,7 +18,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters
 from .filter import TitleFilter
-from .serializers import GetTokenSerializer, UserSerializer, UserMeSerializer
+from .serializers import UserSerializer
 from django.http import JsonResponse
 from django.conf import settings
 from datetime import datetime
