@@ -173,3 +173,18 @@ def get_token(request):
         return JsonResponse(
             {"status": "false", "message": message}, status=500
         )
+
+@api_view(['POST'])
+def signup(request):
+    serializer = SignupSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        user = User.objects.get_or_create()
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            'Регистрация в сервисе отзывов',
+            f'Спасибо за регистрацию! Ваш код подтверждения: {confirmation_code}',
+            request.data['email'])
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

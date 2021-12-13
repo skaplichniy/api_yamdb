@@ -114,3 +114,12 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         exclude = ['review']
 
+
+class SignupSerializer(serializers.Serializer):
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        return value

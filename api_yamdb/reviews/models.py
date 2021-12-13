@@ -24,6 +24,8 @@ class User(AbstractUser):
     class Meta:
         ordering = ("username",)
 
+    
+
 
 class Category(models.Model):
     name = models.CharField(max_length=300)
