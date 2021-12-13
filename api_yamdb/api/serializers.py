@@ -4,17 +4,18 @@ from reviews.models import Category, Genre, Titles, Review, Comments
 from reviews.models import User
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(
-        default='user'
-    )
-
     class Meta:
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
         model = User
-        fields = '__all__'
-    
+        extra_kwargs = {
+            'password': {'required': False},
+            'email': {'required': True}
+        }
+        lookup_field = 'username'
 
 
 class CategorySerializer(serializers.ModelSerializer):

@@ -3,7 +3,8 @@ from rest_framework import routers
 from .views import ReviewViewSet, CommentsViewSet, CategoryViewSet, GenreViewSet, TitlesViewSet
 from rest_framework.routers import DefaultRouter
 
-from .views import UserViewSet, signup, get_token, me, code
+from .views import UserViewSet, get_token, code
+from . import views
 
 app_name = 'api'
 
@@ -22,10 +23,8 @@ router_v1.register('genres', GenreViewSet, basename='genres')
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
-    path('v1/auth/signup/', signup, name='signup'),
     path('v1/auth/token/', get_token, name='get_token'),
-    path('v1/users/me/', me, name='me'),
-    path('v1/auth/code/', code, name='code'),
+    path('v1/auth/email/', code, name='code'),
 ]
 
 
