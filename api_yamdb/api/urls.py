@@ -29,4 +29,3 @@ urlpatterns = [
     path('v1/auth/email/', code, name='code'),
     path('v1/auth/signup/', signup, name='signup'),
 ]
-

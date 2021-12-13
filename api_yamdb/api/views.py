@@ -193,4 +193,3 @@ def signup(request):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=(email,))
     return Response(serializer.data, status=status.HTTP_200_OK)
-
