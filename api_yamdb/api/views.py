@@ -1,5 +1,5 @@
 from rest_framework import permissions, serializers, viewsets
-from .serializers import CategorySerializer, GenreSerializer, TitleWriteSerializer, TitleReadSerializer
+from .serializers import CategorySerializer, GenreSerializer, TitleWriteSerializer, TitleReadSerializer, SignupSerializer
 from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Titles, Review
 from django.shortcuts import get_object_or_404
@@ -22,6 +22,7 @@ from .serializers import UserSerializer
 from django.http import JsonResponse
 from django.conf import settings
 from datetime import datetime
+import uuid
 
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
@@ -76,10 +77,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
             return TitleWriteSerializer
         return TitleReadSerializer
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrAdminOrModerator,)
-    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdmin,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('post_id')
@@ -174,17 +175,22 @@ def get_token(request):
             {"status": "false", "message": message}, status=500
         )
 
+
 @api_view(['POST'])
+@permission_classes((AllowAny,))
 def signup(request):
     serializer = SignupSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get_or_create()
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            'Регистрация в сервисе отзывов',
-            f'Спасибо за регистрацию! Ваш код подтверждения: {confirmation_code}',
-            request.data['email'])
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.validated_data['email']
+    confirmation_code = str(uuid.uuid3(uuid.NAMESPACE_X500, email))
+    user, created = User.objects.get_or_create(
+        **serializer.validated_data,
+        confirmation_code=confirmation_code
+    )
+    send_mail(
+        subject=settings.DEFAULT_EMAIL_SUBJECT,
+        message=user.confirmation_code,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=(email,))
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
