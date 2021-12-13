@@ -21,40 +21,22 @@ class UserSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        exclude = ('id', )
+        fields = ('name', 'slug')
         lookup_field = 'slug'
-        extra_kwargs = {
-            'url': {'lookup_field': 'slug'}
-        }
-
-
-class CategoryField(serializers.SlugRelatedField):
-    def to_representation(self, value):
-        serializer = CategorySerializer(value)
-        return serializer.data
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        exclude = ('id', )
+        fields = ('name', 'slug')
         lookup_field = 'slug'
-        extra_kwargs = {
-            'url': {'lookup_field': 'slug'}
-        }
         
-
-
-class GenreField(serializers.SlugRelatedField):
-    def to_representation(self, value):
-        serializer = GenreSerializer(value)
-        return serializer.data
-
 
 class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.IntegerField(read_only=True, required=False)
+    description = serializers.CharField(required=False)
 
     class Meta:
         fields = '__all__'
@@ -68,7 +50,6 @@ class TitleWriteSerializer(TitleReadSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field='slug'
     )
-
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -116,10 +97,25 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    username = serializers.CharField(max_length=150)
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя "me" не разрешено.'
-            )
-        return value
+    def validate_username(self, name):
+        if name == 'me':
+            raise serializers.ValidationError('Имя занято')
+        return name
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        if (
+            User.objects.filter(username=username).exists()
+            and User.objects.get(username=username).email != email
+        ):
+            raise serializers.ValidationError('Юзернейм занят')
+        if (
+            User.objects.filter(email=email).exists()
+            and User.objects.get(email=email).username != username
+        ):
+            raise serializers.ValidationError('Почта занята')
+        return data

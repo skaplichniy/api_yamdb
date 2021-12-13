@@ -12,14 +12,13 @@ class UserRole(models.TextChoices):
 
 
 class User(AbstractUser):
-    email = models.EmailField("e-mail", unique=True)
-    username = models.CharField("Имя пользователя", max_length=50,
-                                blank=True, null=True, unique=True)
-    bio = models.TextField("О себе", blank=True, null=True)
+    email = models.EmailField('e-mail', unique=True, blank=True)
+    username = models.CharField('Имя пользователя', max_length=50,
+                                blank=True, unique=True)
+    bio = models.TextField("О себе", blank=True)
     role = models.CharField("Роль пользователя", max_length=10,
                             choices=UserRole.choices, default=UserRole.USER)
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ("username",)
+    code = models.CharField(max_length=255)
 
     class Meta:
         ordering = ("username",)
