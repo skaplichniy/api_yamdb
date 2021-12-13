@@ -2,12 +2,20 @@
 from rest_framework import serializers
 from reviews.models import Category, Genre, Titles, Review, Comments
 from reviews.models import User
+from django.contrib.auth import get_user_model
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
         model = User
-        fields = '__all__'
+        extra_kwargs = {
+            'password': {'required': False},
+            'email': {'required': True}
+        }
+        lookup_field = 'username'
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -34,6 +42,7 @@ class GenreSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'slug'}
         }
+        
 
 
 class GenreField(serializers.SlugRelatedField):
@@ -97,37 +106,16 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username',
+        read_only=True
     )
 
     class Meta:
         model = Comments
-        fields = ('id', 'author', 'text', 'pub_date')
+        exclude = ['review']
 
 
-class UserMeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        exclude = ('role',)
-
-
-
-class GetTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
-
-
-class AdminUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = (
-            '__all__'
-        )
+class SignupSerializer(serializers.Serializer):
 
     def validate_username(self, value):
         if value == 'me':
@@ -135,25 +123,3 @@ class AdminUserSerializer(serializers.ModelSerializer):
                 'Имя пользователя "me" не разрешено.'
             )
         return value
-
-
-class SignupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'email',)
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя "me" не разрешено.'
-            )
-        return value
-
-
-class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')

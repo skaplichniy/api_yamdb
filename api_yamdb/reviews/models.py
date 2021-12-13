@@ -1,68 +1,36 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import datetime
 from django.core.exceptions import ValidationError
 
-USER = 'user'
-MODERATOR = 'moderator'
-ADMIN = 'admin'
 
-ROLE_CHOICES = (
-    ('USER', 'user'),
-    ('MODERATOR', 'moderator'),
-    ('ADMIN', 'admin'),
-)
+class UserRole(models.TextChoices):
+    ADMIN = "admin", "Администратор"
+    MODERATOR = "moderator", "Модератор"
+    USER = "user", "Пользователь"
+
 
 class User(AbstractUser):
-    email = models.EmailField(
-        unique=True,
-        verbose_name='Адрес электронной почты'
-    )
-    role = models.CharField(
-        max_length=255,
-        choices=ROLE_CHOICES,
-        default='USER',
-        verbose_name='Роль'
-    )
-    bio = models.TextField(
-        blank=True,
-        verbose_name='Биография'
-    )
-    confirmation_code = models.CharField(
-        max_length=7,
-        verbose_name='Код подтверждения',
-        blank=True,
-        null=True,
-        unique=True
-    )
+    email = models.EmailField("e-mail", unique=True)
+    username = models.CharField("Имя пользователя", max_length=50,
+                                blank=True, null=True, unique=True)
+    bio = models.TextField("О себе", blank=True, null=True)
+    role = models.CharField("Роль пользователя", max_length=10,
+                            choices=UserRole.choices, default=UserRole.USER)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ("username",)
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        ordering = ("username",)
 
-    def __str__(self) -> str:
-        return self.username
-
-    @property
-    def is_admin(self):
-        return self.role == 'admin'
-
-    @property
-    def is_moderator(self):
-        return self.role == 'moderator'
-
-    @property
-    def is_user(self):
-        return self.role == 'user'
+    
 
 
 class Category(models.Model):
     name = models.CharField(max_length=300)
     slug = models.SlugField(null=True, unique=True)
 
-    def __str__(self):
-        return self.name
 
 class Genre(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
@@ -98,7 +66,6 @@ class Titles(models.Model):
         db_index=True,
         related_name='titles',
         verbose_name='Жанр',
-        #null=False,
     )
     category = models.ForeignKey(
         Category,
