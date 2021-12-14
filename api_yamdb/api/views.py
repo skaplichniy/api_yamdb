@@ -21,7 +21,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters
 from .filter import TitleFilter
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserRoleSerializer
 from django.http import JsonResponse
 from django.conf import settings
 from datetime import datetime
@@ -101,7 +101,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrModerator,)
     serializer_class = CommentsSerializer
 
     def get_queryset(self):
@@ -137,6 +137,11 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    def get_serializer_class(self):   #это для тоого чтоб юзер не мог себе роль поменять
+        if self.request.method in ['GET', 'PATCH']:   #но я не догоняю как во вьюсет это прикрутить
+            return UserRoleSerializer
+        return UserSerializer
 
 
 @api_view(["POST"])
@@ -203,5 +208,3 @@ def signup(request):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=(email,))
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-

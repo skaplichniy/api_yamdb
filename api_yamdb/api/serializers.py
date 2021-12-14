@@ -3,9 +3,23 @@ from reviews.models import Category, Genre, Titles, Review, Comments
 from reviews.models import User
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-
+from rest_framework.validators import UniqueTogetherValidator
 
 class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
+        )
+        model = User
+        extra_kwargs = {
+            'password': {'required': False},
+            'email': {'required': True}
+        }
+        lookup_field = 'username'
+
+class UserRoleSerializer(serializers.ModelSerializer):
+    read_only_fields = ('role',)   # новый серелизатор
+    
     class Meta:
         fields = (
             'first_name', 'last_name', 'username', 'bio', 'email', 'role'
@@ -66,6 +80,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
+        
 
 
 class CommentsSerializer(serializers.ModelSerializer):
