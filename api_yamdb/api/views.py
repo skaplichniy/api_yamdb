@@ -1,5 +1,7 @@
-from rest_framework import permissions, serializers, viewsets
-from .serializers import CategorySerializer, GenreSerializer, TitleWriteSerializer, TitleReadSerializer, SignupSerializer
+from rest_framework import viewsets
+from .serializers import (CategorySerializer, GenreSerializer,
+                          TitleWriteSerializer, TitleReadSerializer,
+                          SignupSerializer)
 from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Titles, Review
 from django.shortcuts import get_object_or_404
@@ -7,7 +9,8 @@ from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAdminUser, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
@@ -23,6 +26,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from datetime import datetime
 import uuid
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
@@ -85,7 +89,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get('post_id')
         title = get_object_or_404(Titles, id=title_id)
-        return Review.objects.filter(title=title)
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('post_id')
@@ -188,7 +192,7 @@ def signup(request):
         confirmation_code=confirmation_code
     )
     send_mail(
-        subject=settings.DEFAULT_EMAIL_SUBJECT,
+        subject=settings.EMAIL_BACKEND,
         message=user.confirmation_code,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=(email,))

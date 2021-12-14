@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 import datetime
@@ -12,18 +12,15 @@ class UserRole(models.TextChoices):
 
 
 class User(AbstractUser):
-    email = models.EmailField('e-mail', unique=True, blank=True)
-    username = models.CharField('Имя пользователя', max_length=50,
-                                blank=True, unique=True)
+    email = models.EmailField('E-mail', unique=True, max_length=254)
+    username = models.CharField('Имя пользователя', unique=True, max_length=150)
     bio = models.TextField("О себе", blank=True)
     role = models.CharField("Роль пользователя", max_length=10,
                             choices=UserRole.choices, default=UserRole.USER)
-    code = models.CharField(max_length=255)
+    confirmation_code = models.CharField(max_length=255)
 
     class Meta:
         ordering = ("username",)
-
-    
 
 
 class Category(models.Model):
@@ -34,7 +31,7 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
     slug = models.SlugField(unique=True, verbose_name='Слаг')
-    
+
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
@@ -93,13 +90,14 @@ class Review (models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
     )
-    score = models.IntegerField( 
-        'оценка',
+    score = models.IntegerField(
+        'Оценка',
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
         ]
     )
+
     class Meta:
         constraints = (models.UniqueConstraint(
             fields=('title_id', 'author', ), name='unique pair'), )
