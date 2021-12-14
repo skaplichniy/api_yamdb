@@ -52,113 +52,16 @@ class TitleWriteSerializer(TitleReadSerializer):
     )
 
 
-# class CurrentTitleDefault:
-#     requires_context = True
-
-#     def __call__(self, serializer_field):
-#         c_view = serializer_field.context['view']
-#         title_id = c_view.kwargs.get('title_id')
-#         title = get_object_or_404(Titles, id=title_id)
-#         return title
-
-#     def __repr__(self):
-#         return '%s()' % self.__class__.__name__
-
-
-# class CategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         fields = ('name', 'slug',)
-#         lookup_field = 'slug'
-#         extra_kwargs = {
-#             'url': {'lookup_field': 'slug'}
-#         }
-#         model = Category
-
-
-# class CategoryField(serializers.SlugRelatedField):
-#     def to_representation(self, value):
-#         serializer = CategorySerializer(value)
-#         return serializer.data
-
-
-# class GenreSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         fields = ('name', 'slug',)
-#         lookup_field = 'slug'
-#         extra_kwargs = {
-#             'url': {'lookup_field': 'slug'}
-#         }
-#         model = Genre
-
-
-# class GenreField(serializers.SlugRelatedField):
-#     def to_representation(self, value):
-#         serializer = GenreSerializer(value)
-#         return serializer.data
-
-
-# class TitlesSerializer(serializers.ModelSerializer):
-#     genre = GenreField(slug_field='slug',
-#                        queryset=Genre.objects.all(), many=True)
-#     category = CategoryField(slug_field='slug',
-#                              queryset=Category.objects.all(), required=False)
-#     author = serializers.SlugRelatedField(
-#         slug_field='username',
-#         read_only=True
-#     )
-
-#     class Meta:
-#         model = Titles
-#         fields = '__all__'
-
-
-# class ReviewSerializer(serializers.ModelSerializer):
-#     title = serializers.HiddenField(default=CurrentTitleDefault())
-#     # title = serializers.SlugRelatedField(
-#     #     slug_field='id',
-#     #     required=False,
-#     #     queryset=Titles.objects.all()
-#     # )
-#     author = serializers.SlugRelatedField(
-#         slug_field='username',
-#         read_only=True
-#     )
-
-#     class Meta:
-#         fields = '__all__'
-#         model = Review
-#         # validators = (UniqueTogetherValidator(
-#         #     queryset=Review.objects.all(), fields=('title', 'author')),)
-
-
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        slug_field='name', read_only=True)
-    # default = serializers.CurrentUserDefault()
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True
+        slug_field='username', read_only=True,
+        default=serializers.CurrentUserDefault()
     )
-
-    def validate(self, data):
-        if self.context['request'].method != 'POST':
-            # return data
-
-            user = self.context['view'].kwargs.get('title_id')
-            title_id = self.context['request'].user
-            if Review.objects.filter(
-                    author=user, title=title_id).exists():
-                raise serializers.ValidationError(
-                    'Вы уже написали отзыв к этому произведению.'
-                )
-            return data
-
-    def validate_score(self, value):
-        if not 1 <= value <= 10:
-            raise serializers.ValidationError(
-                'Оценкой может быть целое число в диапазоне от 1 до 10.'
-            )
-        return value
+    title = serializers.SlugRelatedField(
+        slug_field='id',
+        queryset=Titles.objects.all(),
+        required=False
+    )
 
     class Meta:
         model = Review
@@ -167,13 +70,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
+        default=serializers.CurrentUserDefault(),
         slug_field='username',
         read_only=True
     )
 
     class Meta:
         model = Comments
-        exclude = ['review']
+        fields = '__all__'
 
 
 class SignupSerializer(serializers.Serializer):

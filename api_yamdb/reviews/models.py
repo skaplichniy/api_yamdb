@@ -80,12 +80,14 @@ class Titles(models.Model):
 
 
 class Review (models.Model):
-    title_id = models.OneToOneField(
-        Titles, on_delete=models.CASCADE, related_name='review'
+    title = models.ForeignKey(
+        Titles, on_delete=models.CASCADE, related_name='reviews', db_index=True,
+        null=False
     )
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='review'
+        User, on_delete=models.CASCADE, related_name='reviews', db_index=True,
+        null=False
     )
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True
@@ -97,10 +99,14 @@ class Review (models.Model):
             MaxValueValidator(10)
         ]
     )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True,
+        db_index=True)
 
     class Meta:
         constraints = (models.UniqueConstraint(
-            fields=('title_id', 'author', ), name='unique pair'), )
+            fields=('title', 'author', ), name='unique pair'), )
 
 
 class Comments (models.Model):
@@ -111,5 +117,7 @@ class Comments (models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='comments'
     )
-    pub_date = models.DateTimeField(
-        'Дата добавления', auto_now_add=True)
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.text
