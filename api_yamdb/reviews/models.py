@@ -5,18 +5,20 @@ import datetime
 from django.core.exceptions import ValidationError
 
 
-class UserRole(models.TextChoices):
-    ADMIN = "admin", "Администратор"
-    MODERATOR = "moderator", "Модератор"
-    USER = "user", "Пользователь"
-
-
 class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+    ROLE_CHOISES = [
+        (USER, 'user'),
+        (MODERATOR, 'moderator'),
+        (ADMIN, 'admin')
+    ]
     email = models.EmailField('E-mail', unique=True, max_length=254)
     username = models.CharField('Имя пользователя', unique=True, max_length=150)
     bio = models.TextField("О себе", blank=True)
     role = models.CharField("Роль пользователя", max_length=10,
-                            choices=UserRole.choices, default=UserRole.USER)
+                            choices=ROLE_CHOISES, default=USER)
     confirmation_code = models.CharField(max_length=255)
 
     class Meta:
