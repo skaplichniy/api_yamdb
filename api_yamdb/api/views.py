@@ -21,7 +21,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters
 from .filter import TitleFilter
-from .serializers import UserSerializer, UserRoleSerializer
+from .serializers import UserSerializer
 from django.http import JsonResponse
 from django.conf import settings
 from datetime import datetime
@@ -138,10 +138,6 @@ class UserViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-    def get_serializer_class(self):   #это для тоого чтоб юзер не мог себе роль поменять
-        if self.request.method in ['GET', 'PATCH']:   #но я не догоняю как во вьюсет это прикрутить
-            return UserRoleSerializer
-        return UserSerializer
 
 
 @api_view(["POST"])

@@ -17,20 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
         }
         lookup_field = 'username'
 
-class UserRoleSerializer(serializers.ModelSerializer):
-    read_only_fields = ('role',)   # новый серелизатор
-    
-    class Meta:
-        fields = (
-            'first_name', 'last_name', 'username', 'bio', 'email', 'role'
-        )
-        model = User
-        extra_kwargs = {
-            'password': {'required': False},
-            'email': {'required': True}
-        }
-        lookup_field = 'username'
-
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -80,6 +66,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
+
+    
         
 
 
