@@ -1,9 +1,10 @@
-from rest_framework import serializers
-from reviews.models import Category, Genre, Titles, Review, Comments
+from rest_framework import serializers, status
+from reviews.models import Category, Genre, Title, Review, Comments
 from reviews.models import User
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.validators import UniqueTogetherValidator
+from http import HTTPStatus
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,7 +41,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
 
 class TitleWriteSerializer(TitleReadSerializer):
@@ -59,13 +60,27 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
     title = serializers.SlugRelatedField(
         slug_field='id',
-        queryset=Titles.objects.all(),
+        queryset=Title.objects.all(),
         required=False
     )
 
     class Meta:
         model = Review
         fields = '__all__'
+
+    def validate(self, data):
+        data_kwargs = self.context['request'].parser_context['kwargs']
+
+        if 'pk' in data_kwargs:
+            return data
+
+        title_id = data_kwargs['title_id']
+        title = get_object_or_404(Title, id=title_id)
+        if self.context['request'].user.reviews.filter(title=title).exists():
+            raise serializers.ValidationError(
+                detail='Ваш отзыв уже существует!',
+                code=status.HTTP_400_BAD_REQUEST)
+        return data
 
     
         
@@ -80,7 +95,8 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        fields = '__all__'
+        read_only_fields = ('review',)
+        fields = ('id', 'author', 'review_id', 'text', 'pub_date')
 
 
 class SignupSerializer(serializers.Serializer):
@@ -91,7 +107,9 @@ class SignupSerializer(serializers.Serializer):
         if name == 'me':
             raise serializers.ValidationError('Имя занято')
         return name
-
+    
+        
+        
     def validate(self, data):
         username = data.get('username')
         email = data.get('email')
@@ -106,3 +124,4 @@ class SignupSerializer(serializers.Serializer):
         ):
             raise serializers.ValidationError('Почта занята')
         return data
+            

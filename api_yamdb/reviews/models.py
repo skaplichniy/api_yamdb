@@ -42,7 +42,7 @@ class Genre(models.Model):
         return f'{self.name} {self.name}'
 
 
-class Titles(models.Model):
+class Title(models.Model):
     def year_validator(value):
         if value > datetime.date.today().year:
             raise ValidationError(
@@ -83,7 +83,7 @@ class Titles(models.Model):
 
 class Review (models.Model):
     title = models.ForeignKey(
-        Titles, on_delete=models.CASCADE, related_name='reviews', db_index=True,
+        Title, on_delete=models.CASCADE, related_name='reviews', db_index=True,
         null=False
     )
     text = models.TextField()
@@ -107,8 +107,13 @@ class Review (models.Model):
         db_index=True)
 
     class Meta:
-        constraints = (models.UniqueConstraint(
-            fields=('title', 'author', ), name='unique pair'), )
+        ordering = ['-pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            ),
+        ]
 
 
 class Comments (models.Model):
