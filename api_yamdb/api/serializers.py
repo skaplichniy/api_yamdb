@@ -66,6 +66,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
+        read_only_fields = ('title_id',)
         fields = '__all__'
 
     def validate(self, data):
@@ -95,7 +96,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-        read_only_fields = ('review',)
+       # read_only_fields = ('review',)
         fields = ('id', 'author', 'review_id', 'text', 'pub_date')
 
 
@@ -124,4 +125,16 @@ class SignupSerializer(serializers.Serializer):
         ):
             raise serializers.ValidationError('Почта занята')
         return data
-            
+             
+    #def validate_name(self, data, username):
+       # username = data.get('username')
+      #  user_name = get_object_or_404(Title, username=username)
+        
+       # return user_name
+class TokenSerializer(UserSerializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
