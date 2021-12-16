@@ -136,7 +136,7 @@ class UserViewSet(viewsets.ModelViewSet):
             partial=True
         )
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        serializer.save(role=user.role, partial=True)
         return Response(serializer.data)
 
 
