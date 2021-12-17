@@ -1,17 +1,14 @@
-from django.db.models.expressions import Exists
 from rest_framework import viewsets
 from .serializers import (CategorySerializer, GenreSerializer,
                           TitleWriteSerializer, TitleReadSerializer,
                           SignupSerializer)
-from .serializers import ReviewSerializer, CommentsSerializer
+from .serializers import ReviewSerializer, CommentsSerializer, TokenSerializer
 from reviews.models import Category, Genre, Title, Review
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework import viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import (AllowAny, IsAdminUser, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
@@ -22,7 +19,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import filters
 from .filter import TitleFilter
-from .serializers import UserSerializer
 from django.http import JsonResponse
 from django.conf import settings
 from datetime import datetime
@@ -98,7 +94,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         serializer.save(author=self.request.user, title=title)
-        
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
@@ -140,7 +135,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def code(request):
@@ -165,7 +159,7 @@ def code(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def get_token(request):
-    serializer = SignupSerializer(data=request.data)
+    serializer = TokenSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -184,15 +178,9 @@ def get_token(request):
     else:
         message = "Ops! Bad wrong!"
         return JsonResponse(
-            {"status": "false", "message": message}, status=500
+            {"status": "false", "message": message}, status=400
         )
 
-#def validate_name(self, name, data):
- #   username = data.get('username')
-  #  if User.objects.filter(username=username).exists():
-   #     return name
-    #raise serializers.ValidationError('Имени не существует')
-        
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))

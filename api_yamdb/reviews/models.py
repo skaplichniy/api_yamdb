@@ -15,7 +15,8 @@ class User(AbstractUser):
         (ADMIN, 'admin')
     ]
     email = models.EmailField('E-mail', unique=True, max_length=254)
-    username = models.CharField('Имя пользователя', unique=True, max_length=150)
+    username = models.CharField(
+        'Имя пользователя', unique=True, max_length=150)
     bio = models.TextField("О себе", blank=True)
     role = models.CharField("Роль пользователя", max_length=10,
                             choices=ROLE_CHOISES, default=USER)

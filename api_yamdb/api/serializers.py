@@ -1,10 +1,8 @@
 from rest_framework import serializers, status
 from reviews.models import Category, Genre, Title, Review, Comments
 from reviews.models import User
-from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework.validators import UniqueTogetherValidator
-from http import HTTPStatus
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -83,9 +81,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 code=status.HTTP_400_BAD_REQUEST)
         return data
 
-    
-        
-
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -96,7 +91,6 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comments
-       # read_only_fields = ('review',)
         fields = ('id', 'author', 'review_id', 'text', 'pub_date')
 
 
@@ -108,9 +102,7 @@ class SignupSerializer(serializers.Serializer):
         if name == 'me':
             raise serializers.ValidationError('Имя занято')
         return name
-    
-        
-        
+
     def validate(self, data):
         username = data.get('username')
         email = data.get('email')
@@ -125,12 +117,8 @@ class SignupSerializer(serializers.Serializer):
         ):
             raise serializers.ValidationError('Почта занята')
         return data
-             
-    #def validate_name(self, data, username):
-       # username = data.get('username')
-      #  user_name = get_object_or_404(Title, username=username)
-        
-       # return user_name
+
+
 class TokenSerializer(UserSerializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
