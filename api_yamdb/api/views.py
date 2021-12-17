@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from .serializers import (CategorySerializer, GenreSerializer,
                           TitleWriteSerializer, TitleReadSerializer,
                           SignupSerializer)
-from .serializers import ReviewSerializer, CommentsSerializer, TokenSerializer
+from .serializers import ReviewSerializer, CommentsSerializer
 from reviews.models import Category, Genre, Title, Review
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
@@ -165,7 +165,7 @@ def code(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def get_token(request):
-    serializer = TokenSerializer(data=request.data)
+    serializer = SignupSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -184,10 +184,14 @@ def get_token(request):
     else:
         message = "Ops! Bad wrong!"
         return JsonResponse(
-            {"status": "false", "message": message}, status=400
+            {"status": "false", "message": message}, status=500
         )
 
-
+#def validate_name(self, name, data):
+ #   username = data.get('username')
+  #  if User.objects.filter(username=username).exists():
+   #     return name
+    #raise serializers.ValidationError('Имени не существует')
         
 
 @api_view(['POST'])
