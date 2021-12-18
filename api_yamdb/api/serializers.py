@@ -73,7 +73,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if 'pk' in data_kwargs:
             return data
 
-        title_id = data_kwargs['title_id']
+        title_id = data_kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         if self.context['request'].user.reviews.filter(title=title).exists():
             raise serializers.ValidationError(

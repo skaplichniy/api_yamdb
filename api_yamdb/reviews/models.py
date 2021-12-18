@@ -17,13 +17,13 @@ class User(AbstractUser):
     email = models.EmailField('E-mail', unique=True, max_length=254)
     username = models.CharField(
         'Имя пользователя', unique=True, max_length=150)
-    bio = models.TextField("О себе", blank=True)
-    role = models.CharField("Роль пользователя", max_length=10,
+    bio = models.TextField('О себе', blank=True)
+    role = models.CharField('Роль пользователя', max_length=10,
                             choices=ROLE_CHOISES, default=USER)
     confirmation_code = models.CharField(max_length=255)
 
     class Meta:
-        ordering = ("username",)
+        ordering = ('username',)
 
 
 class Category(models.Model):
@@ -65,11 +65,13 @@ class Title(models.Model):
         db_index=True,
         related_name='titles',
         verbose_name='Жанр',
+        help_text='Муз. жанр'
     )
     category = models.ForeignKey(
         Category,
         related_name='titles',
         verbose_name='Категория',
+        help_text='Категория произведения',
         db_index=True,
         on_delete=models.CASCADE,
     )

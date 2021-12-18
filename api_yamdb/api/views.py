@@ -1,29 +1,27 @@
-from rest_framework import viewsets
-from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleWriteSerializer, TitleReadSerializer,
-                          SignupSerializer)
-from .serializers import ReviewSerializer, CommentsSerializer, TokenSerializer
-from reviews.models import Category, Genre, Title, Review
-from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
+import uuid
+
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.pagination import LimitOffsetPagination
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
-from reviews.models import User
-from .serializers import UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import filters
-from .filter import TitleFilter
 from django.http import JsonResponse
 from django.conf import settings
-from datetime import datetime
-import uuid
 from django.db.models import Avg
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+
+from rest_framework import status, viewsets, filters
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from reviews.models import Category, Genre, Title, Review, User
+
+from .filter import TitleFilter
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
+from .serializers import (CategorySerializer, GenreSerializer,
+                          TitleWriteSerializer, TitleReadSerializer,
+                          SignupSerializer, ReviewSerializer,
+                          CommentsSerializer, TokenSerializer, UserSerializer)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -114,14 +112,14 @@ class CommentsViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = (IsAdmin,)
     lookup_field = 'username'
-    filter_backends = [filters.SearchFilter]
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('=username',)
 
     @action(
         methods=('get', 'patch'), detail=False,
-        permission_classes=[IsAuthenticated],
+        permission_classes=(IsAuthenticated,),
     )
     def me(self, request):
         user = self.request.user
@@ -135,29 +133,28 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
+@api_view(['POST'])
+@permission_classes((AllowAny,))
 def code(request):
-    email = request.data["email"]
-    username = email.split("@")[0]
+    email = request.data['email']
+    username = email.split('@')[0]
     user = User.objects.create(
         username=username,
         email=email,
-        last_login=datetime.now(),
     )
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
-        "Confirmation code",
-        f"{confirmation_code}",
-        f"{settings.ADMIN_EMAIL}",  # Это поле "От кого"
-        [f"{email}"],  # Это поле "Кому" (можно указать список адресов)
-        fail_silently=False,  # Сообщать об ошибках («молчать ли об ошибках?»)
+        'Confirmation code',
+        f'{confirmation_code}',
+        f'{settings.ADMIN_EMAIL}',
+        [f'{email}'],
+        fail_silently=False,
     )
     return Response(confirmation_code, status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
+@api_view(['POST'])
+@permission_classes((AllowAny,))
 def get_token(request):
     serializer = TokenSerializer(data=request.data)
     if not serializer.is_valid():
@@ -165,20 +162,12 @@ def get_token(request):
 
     username = serializer.data['username']
     user = get_object_or_404(User, username=username)
-    confirmation_code = request.data["confirmation_code"]
-    refresh = RefreshToken.for_user(user)
-    response = {
-        "access_token": str(refresh.access_token),
-        "refresh_token": str(refresh),
-    }
+    confirmation_code = request.data['confirmation_code']
     if default_token_generator.check_token(user, confirmation_code):
         user.is_active = True
         user.save()
-        return JsonResponse(response)
-    else:
-        message = "Ops! Bad wrong!"
-        return JsonResponse(
-            {"status": "false", "message": message}, status=400
+    return JsonResponse(
+        {'status': 'false', 'message': 'Что-то пошло не так'}, status=400,
         )
 
 
