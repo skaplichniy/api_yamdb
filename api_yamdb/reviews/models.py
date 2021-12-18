@@ -1,8 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-import datetime
-from django.core.exceptions import ValidationError
+from .validators import validate_year
 
 
 class User(AbstractUser):
@@ -59,19 +58,14 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    def year_validator(value):
-        if value > datetime.date.today().year:
-            raise ValidationError(
-                ('%(value)s год не должен быть больше нынешнего!'),
-                params={'value': value},
-            )
     name = models.CharField(
         verbose_name='Наименование произведения',
         help_text='наименование', max_length=256, db_index=True,
     )
     year = models.IntegerField(
         verbose_name='Год произведения',
-        validators=[year_validator],)
+        validators=(validate_year, )
+    )
     description = models.TextField(
         verbose_name='Описание произведения',
         help_text='Описание',
@@ -94,12 +88,12 @@ class Title(models.Model):
         on_delete=models.CASCADE,
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.name
 
 
 class Review (models.Model):
@@ -157,9 +151,9 @@ class Comments (models.Model):
         help_text='Автор комментария')
     pub_date = models.DateTimeField('Дата добавления', auto_now_add=True)
 
-    def __str__(self):
-        return self.text
-
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+    
+    def __str__(self):
+        return self.text

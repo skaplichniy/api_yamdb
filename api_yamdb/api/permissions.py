@@ -32,8 +32,6 @@ class IsAuthorOrAdminOrModerator(permissions.BasePermission):
                 or request.user.role == 'moderator'
                 or obj.author == request.user
                 or request.method == 'POST'
-                and request.user.is_authenticated):
+                    and request.user.is_authenticated):
                 return True
             return False
-            
-
