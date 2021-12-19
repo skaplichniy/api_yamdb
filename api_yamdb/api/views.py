@@ -168,7 +168,7 @@ def get_token(request):
         user.save()
     return JsonResponse(
         {'status': 'false', 'message': 'Что-то пошло не так'}, status=400,
-        )
+    )
 
 
 @api_view(['POST'])
