@@ -29,6 +29,18 @@ class User(AbstractUser):
         verbose_name = 'Автор'
         verbose_name_plural = 'Авторы'
 
+    @property
+    def is_user(self):
+        return self.is_user
+
+    @property
+    def is_admin(self):
+        return self.is_admin
+
+    @property
+    def is_moderator(self):
+        return self.is_moderator
+
 
 class Category(models.Model):
     name = models.CharField(max_length=300)
@@ -154,6 +166,6 @@ class Comments (models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-    
+
     def __str__(self):
         return self.text
