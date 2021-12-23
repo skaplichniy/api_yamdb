@@ -16,12 +16,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from reviews.models import Category, Genre, Title, Review, User
 
-from .filter import TitleFilter
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrAdminOrModerator
-from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleWriteSerializer, TitleReadSerializer,
-                          SignupSerializer, ReviewSerializer,
-                          CommentsSerializer, TokenSerializer, UserSerializer)
+from api.filter import TitleFilter
+from api.permissions import (IsAdmin, IsAdminOrReadOnly,
+                             IsAuthorOrAdminOrModerator)
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             TitleWriteSerializer, TitleReadSerializer,
+                             SignupSerializer, ReviewSerializer,
+                             CommentsSerializer, TokenSerializer,
+                             UserSerializer)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -74,7 +76,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.request.method in ['POST', 'PATCH']:
+        if self.request.method in ('POST', 'PATCH'):
             return TitleWriteSerializer
         return TitleReadSerializer
 
