@@ -31,7 +31,7 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.is_user
+        return self.role == self.is_user
 
     @property
     def is_admin(self):
@@ -43,8 +43,15 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=300)
-    slug = models.SlugField(null=True, unique=True)
+    name = models.CharField(
+        max_length=300,
+        verbose_name='Название',
+        help_text='название')
+    slug = models.SlugField(
+        null=True,
+        unique=True,
+        verbose_name='Слаг',
+        help_text='Слаг')
 
     class Meta:
         verbose_name = 'Категория'
