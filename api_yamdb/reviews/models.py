@@ -31,15 +31,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == self.is_user
+        return self.role == self.USER
 
     @property
     def is_admin(self):
-        return self.is_admin
+        return self.USER
 
     @property
     def is_moderator(self):
-        return self.is_moderator
+        return self.MODERATOR
 
 
 class Category(models.Model):
