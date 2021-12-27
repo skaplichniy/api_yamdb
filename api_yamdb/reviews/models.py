@@ -31,20 +31,27 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.is_user
+        return self.role == self.USER
 
     @property
     def is_admin(self):
-        return self.is_admin
+        return self.role == self.ADMIN
 
     @property
     def is_moderator(self):
-        return self.is_moderator
+        return self.role == self.MODERATOR
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=300)
-    slug = models.SlugField(null=True, unique=True)
+    name = models.CharField(
+        max_length=300,
+        verbose_name='Название',
+        help_text='название')
+    slug = models.SlugField(
+        null=True,
+        unique=True,
+        verbose_name='Слаг',
+        help_text='Слаг')
 
     class Meta:
         verbose_name = 'Категория'
