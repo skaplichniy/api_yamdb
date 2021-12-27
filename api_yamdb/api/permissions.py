@@ -33,7 +33,7 @@ class IsAuthorOrAdminOrModerator(permissions.BasePermission):
             if (request.user.is_staff or request.user.is_admin
                 or request.user.is_moderator
                 or obj.author == request.user
-                or request.method == 'POST'
+                or request.method == 'POST' and 'PUT'
                     and request.user.is_authenticated):
                 return True
             return False

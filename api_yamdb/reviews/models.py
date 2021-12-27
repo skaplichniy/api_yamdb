@@ -73,7 +73,7 @@ class Genre(models.Model):
         verbose_name_plural = 'Жанры'
 
     def __str__(self):
-        return f'{self.name} {self.name}'
+        return f'{self.name}'
 
 
 class Title(models.Model):
@@ -96,7 +96,7 @@ class Title(models.Model):
         db_index=True,
         related_name='titles',
         verbose_name='Жанр',
-        help_text='Муз. жанр'
+        help_text='жанр'
     )
     category = models.ForeignKey(
         Category,

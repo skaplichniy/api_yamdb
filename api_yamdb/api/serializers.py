@@ -35,7 +35,6 @@ class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.IntegerField(read_only=True, required=False)
-    description = serializers.CharField(required=False)
 
     class Meta:
         fields = '__all__'
@@ -64,7 +63,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        read_only_fields = ('title_id',)
+        read_only_fields = ('title',)
         fields = '__all__'
 
     def validate(self, data):
