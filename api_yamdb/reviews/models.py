@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from .validators import validate_year
+from reviews.validators import validate_year
 
 
 class User(AbstractUser):
@@ -96,7 +96,7 @@ class Title(models.Model):
         db_index=True,
         related_name='titles',
         verbose_name='Жанр',
-        help_text='жанр'
+        help_text='Жанр'
     )
     category = models.ForeignKey(
         Category,

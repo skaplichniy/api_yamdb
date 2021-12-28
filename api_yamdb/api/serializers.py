@@ -1,7 +1,9 @@
-from rest_framework import serializers, status
-from reviews.models import Category, Genre, Title, Review, Comments
-from reviews.models import User
 from django.shortcuts import get_object_or_404
+
+from rest_framework import serializers, status
+
+from reviews.models import (Category, Genre, Title,
+                            Review, Comments, User)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -118,7 +120,7 @@ class SignupSerializer(serializers.Serializer):
         return data
 
 
-class TokenSerializer(UserSerializer):
+class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
